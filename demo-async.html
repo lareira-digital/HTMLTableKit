@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLTableKit Async Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+            color: #666;
+        }
+        
+        .error {
+            color: #f44336;
+            margin-top: 10px;
+        }
+        
+        .success {
+            color: #4CAF50;
+            margin-top: 10px;
+        }
+        
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .api-simulator {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTMLTableKit Async Demo</h1>
+    
+    <div class="api-simulator">
+        <h3>🔧 API Simulator</h3>
+        <p>This demo simulates API calls with a 1-second delay to demonstrate async functionality.</p>
+        <label>
+            <input type="checkbox" id="simulateError" /> Simulate API errors
+        </label>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Products Table with Async Operations</h2>
+        <table id="productsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-id="prod_1">
+                    <td>prod_1</td>
+                    <td>Laptop</td>
+                    <td>999.99</td>
+                    <td>15</td>
+                </tr>
+                <tr data-id="prod_2">
+                    <td>prod_2</td>
+                    <td>Mouse</td>
+                    <td>29.99</td>
+                    <td>50</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>Add Product (with API call)</h3>
+        <input type="text" id="newProduct" placeholder="Product Name">
+        <input type="number" id="newPrice" placeholder="Price" step="0.01">
+        <input type="number" id="newStock" placeholder="Stock">
+        <button id="addProductBtn" onclick="addProductAsync()">Add Product</button>
+        <span id="addLoading" class="loading" style="display:none;">Adding to database...</span>
+        
+        <h3>Update Product Price (with API call)</h3>
+        <input type="text" id="updateId" placeholder="Product ID">
+        <input type="number" id="updatePrice" placeholder="New Price" step="0.01">
+        <button id="updateProductBtn" onclick="updateProductAsync()">Update Price</button>
+        <span id="updateLoading" class="loading" style="display:none;">Updating database...</span>
+        
+        <h3>Delete Product (with API call)</h3>
+        <input type="text" id="deleteId" placeholder="Product ID">
+        <button id="deleteProductBtn" onclick="deleteProductAsync()">Delete Product</button>
+        <span id="deleteLoading" class="loading" style="display:none;">Deleting from database...</span>
+        
+        <div id="message"></div>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Code Example</h2>
+        <pre><code>// Async add with API call
+const newProduct = await tableKit.addRowAsync(
+    { product: name, price: price, stock: stock },
+    async (row) => {
+        // Make API call
+        const response = await fetch('/api/products', {
+            method: 'POST',
+            body: JSON.stringify(row)
+        });
+        
+        if (!response.ok) {
+            return null; // Cancel operation
+        }
+        
+        const savedProduct = await response.json();
+        return savedProduct; // Return updated data from server
+    }
+);
+
+// Async update with validation
+const success = await tableKit.updateRowAsync(
+    productId,
+    { price: newPrice },
+    async (row, updates) => {
+        // Validate on server
+        const response = await fetch(`/api/products/${row.id}/validate-price`, {
+            method: 'POST',
+            body: JSON.stringify({ price: updates.price })
+        });
+        
+        if (!response.ok) {
+            return null; // Cancel if validation fails
+        }
+        
+        return updates; // Proceed with update
+    }
+);
+
+// Async delete with confirmation
+const deleted = await tableKit.deleteRowAsync(
+    productId,
+    async (row) => {
+        // Delete from server
+        const response = await fetch(`/api/products/${row.id}`, {
+            method: 'DELETE'
+        });
+        
+        return response.ok; // Only delete locally if server deletion succeeds
+    }
+);</code></pre>
+    </div>
+
+    <script src="dist/HTMLTableKit.standalone.js"></script>
+    <script>
+        // Initialize table
+        const tableKit = new HTMLTableKit('productsTable');
+        let productIdCounter = 3;
+        
+        // Simulate API call with delay
+        function simulateApiCall(success = true, delay = 1000) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    if (success && !document.getElementById('simulateError').checked) {
+                        resolve({ success: true });
+                    } else {
+                        reject(new Error('API Error: Operation failed'));
+                    }
+                }, delay);
+            });
+        }
+        
+        function showMessage(message, isError = false) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = message;
+            messageEl.className = isError ? 'error' : 'success';
+            setTimeout(() => {
+                messageEl.textContent = '';
+            }, 3000);
+        }
+        
+        async function addProductAsync() {
+            const name = document.getElementById('newProduct').value;
+            const price = document.getElementById('newPrice').value;
+            const stock = document.getElementById('newStock').value;
+            
+            if (!name || !price || !stock) {
+                showMessage('Please fill all fields', true);
+                return;
+            }
+            
+            const btn = document.getElementById('addProductBtn');
+            const loading = document.getElementById('addLoading');
+            
+            btn.disabled = true;
+            loading.style.display = 'inline';
+            
+            try {
+                const newProduct = await tableKit.addRowAsync(
+                    {
+                        id: `prod_${productIdCounter}`,
+                        product: name,
+                        price: parseFloat(price),
+                        stock: parseInt(stock)
+                    },
+                    async (row) => {
+                        // Simulate API call to save product
+                        console.log('Sending to API:', row);
+                        await simulateApiCall();
+                        
+                        // Simulate server returning the saved product with server-generated ID
+                        const serverProduct = {
+                            ...row,
+                            id: `prod_${productIdCounter++}`
+                        };
+                        
+                        console.log('Received from API:', serverProduct);
+                        return serverProduct;
+                    }
+                );
+                
+                if (newProduct) {
+                    showMessage(`Product "${name}" added successfully!`);
+                    // Clear form
+                    document.getElementById('newProduct').value = '';
+                    document.getElementById('newPrice').value = '';
+                    document.getElementById('newStock').value = '';
+                }
+            } catch (error) {
+                showMessage(`Failed to add product: ${error.message}`, true);
+                console.error('Add error:', error);
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        async function updateProductAsync() {
+            const id = document.getElementById('updateId').value;
+            const price = document.getElementById('updatePrice').value;
+            
+            if (!id || !price) {
+                showMessage('Please provide product ID and new price', true);
+                return;
+            }
+            
+            const btn = document.getElementById('updateProductBtn');
+            const loading = document.getElementById('updateLoading');
+            
+            btn.disabled = true;
+            loading.style.display = 'inline';
+            
+            try {
+                const success = await tableKit.updateRowAsync(
+                    id,
+                    { price: parseFloat(price) },
+                    async (row, updates) => {
+                        // Simulate API call to validate and update
+                        console.log('Validating price update:', { row, updates });
+                        
+                        // Simulate price validation
+                        if (updates.price < 0) {
+                            throw new Error('Price cannot be negative');
+                        }
+                        
+                        await simulateApiCall();
+                        
+                        console.log('Price update approved by server');
+                        return updates;
+                    }
+                );
+                
+                if (success) {
+                    showMessage(`Product ${id} price updated successfully!`);
+                    document.getElementById('updateId').value = '';
+                    document.getElementById('updatePrice').value = '';
+                } else {
+                    showMessage('Product not found', true);
+                }
+            } catch (error) {
+                showMessage(`Failed to update product: ${error.message}`, true);
+                console.error('Update error:', error);
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        async function deleteProductAsync() {
+            const id = document.getElementById('deleteId').value;
+            
+            if (!id) {
+                showMessage('Please provide product ID', true);
+                return;
+            }
+            
+            const btn = document.getElementById('deleteProductBtn');
+            const loading = document.getElementById('deleteLoading');
+            
+            btn.disabled = true;
+            loading.style.display = 'inline';
+            
+            try {
+                const success = await tableKit.deleteRowAsync(
+                    id,
+                    async (row) => {
+                        // Simulate API call to delete
+                        console.log('Deleting from server:', row);
+                        
+                        if (!confirm(`Are you sure you want to delete "${row.product}"?`)) {
+                            return false; // Cancel deletion
+                        }
+                        
+                        await simulateApiCall();
+                        
+                        console.log('Product deleted from server');
+                        return true; // Proceed with local deletion
+                    }
+                );
+                
+                if (success) {
+                    showMessage(`Product ${id} deleted successfully!`);
+                    document.getElementById('deleteId').value = '';
+                } else {
+                    showMessage('Product not found or deletion cancelled', true);
+                }
+            } catch (error) {
+                showMessage(`Failed to delete product: ${error.message}`, true);
+                console.error('Delete error:', error);
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Log initial state
+        console.log('Initial table data:', tableKit.getTable());
+    </script>
+</body>
+</html>

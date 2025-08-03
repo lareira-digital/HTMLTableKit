@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLTableKit ES6 Module Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTMLTableKit ES6 Module Demo</h1>
+    
+    <div class="info">
+        <h3>⚠️ Important: ES6 Module Usage</h3>
+        <p>This demo uses ES6 modules. To run it, you need to serve it through a web server, not open it directly as a file.</p>
+        <p><strong>Quick start options:</strong></p>
+        <ul>
+            <li>Python: <code>python -m http.server 8000</code></li>
+            <li>Node.js: <code>npx http-server</code></li>
+            <li>VS Code: Use the "Live Server" extension</li>
+        </ul>
+    </div>
+    
+    <table id="sampleTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Laptop</td>
+                <td>999.99</td>
+                <td>15</td>
+            </tr>
+            <tr>
+                <td>Mouse</td>
+                <td>29.99</td>
+                <td>50</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <button id="showData">Show Table Data</button>
+    <button id="addProduct">Add Product</button>
+    
+    <div id="output"></div>
+
+    <script type="module">
+        // Import the ES6 module
+        import HTMLTableKit from './dist/HTMLTableKit.js';
+        
+        // Initialize the table
+        const tableKit = new HTMLTableKit('sampleTable');
+        
+        // Show table data
+        document.getElementById('showData').addEventListener('click', () => {
+            const data = tableKit.getTable();
+            document.getElementById('output').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        });
+        
+        // Add a product
+        document.getElementById('addProduct').addEventListener('click', () => {
+            const newProduct = tableKit.addRow({
+                product: 'Keyboard',
+                price: 79.99,
+                stock: 25
+            });
+            console.log('Added product:', newProduct);
+            alert('Product added! Click "Show Table Data" to see the updated data.');
+        });
+        
+        // Log to console for debugging
+        console.log('HTMLTableKit initialized with ES6 modules');
+        console.log('Initial table data:', tableKit.getTable());
+    </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLTableKit Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button.delete {
+            background-color: #f44336;
+        }
+        
+        button.delete:hover {
+            background-color: #da190b;
+        }
+        
+        .output {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .hidden-inputs {
+            background-color: #fffbf0;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ffa500;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTMLTableKit Demo</h1>
+    
+    <!-- Demo 1: Basic Table with Headers -->
+    <div class="demo-section">
+        <h2>Demo 1: Basic Table with Headers</h2>
+        <table id="employeeTable" name="Employee Records">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Salary</th>
+                    <th>Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-id="emp1">
+                    <td>John Doe</td>
+                    <td>30</td>
+                    <td>50000.50</td>
+                    <td>true</td>
+                </tr>
+                <tr data-id="emp2">
+                    <td>Jane Smith</td>
+                    <td>25</td>
+                    <td>45000</td>
+                    <td>true</td>
+                </tr>
+                <tr data-id="emp3">
+                    <td>Bob Johnson</td>
+                    <td>35</td>
+                    <td>60000.75</td>
+                    <td>false</td>
+                </tr>
+            </tbody>
+            <input type="hidden" id="tableVersion" value="1.0">
+            <input type="hidden" name="lastUpdated" value="2025-01-03">
+        </table>
+        
+        <div class="controls">
+            <h3>Add New Employee</h3>
+            <input type="text" id="newName" placeholder="Name">
+            <input type="number" id="newAge" placeholder="Age">
+            <input type="number" id="newSalary" placeholder="Salary" step="0.01">
+            <select id="newActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+            <button onclick="addEmployee()">Add Employee</button>
+            
+            <h3>Update Employee</h3>
+            <input type="text" id="updateId" placeholder="Employee ID">
+            <input type="number" id="updateSalary" placeholder="New Salary" step="0.01">
+            <button onclick="updateEmployee()">Update Salary</button>
+            
+            <h3>Delete Employee</h3>
+            <input type="text" id="deleteId" placeholder="Employee ID">
+            <button class="delete" onclick="deleteEmployee()">Delete Employee</button>
+        </div>
+        
+        <button onclick="showTableObject('employeeTable')">Show Table Object</button>
+        <button onclick="refreshTable('employeeTable')">Refresh Table</button>
+        <div id="output1" class="output"></div>
+    </div>
+    
+    <!-- Demo 2: Table without Headers -->
+    <div class="demo-section">
+        <h2>Demo 2: Table without Headers (Numeric Columns)</h2>
+        <table id="dataTable">
+            <tr>
+                <td>Item 1</td>
+                <td>100</td>
+                <td>Available</td>
+            </tr>
+            <tr>
+                <td>Item 2</td>
+                <td>200</td>
+                <td>Out of Stock</td>
+            </tr>
+            <tr>
+                <td>Item 3</td>
+                <td>150</td>
+                <td>Available</td>
+            </tr>
+        </table>
+        
+        <button onclick="showTableObject('dataTable')">Show Table Object</button>
+        <div id="output2" class="output"></div>
+    </div>
+    
+    <!-- Demo 3: Table with Mixed Content -->
+    <div class="demo-section">
+        <h2>Demo 3: Table with Mixed Content (Free Type)</h2>
+        <table id="mixedTable">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Laptop</td>
+                    <td>999.99</td>
+                    <td><button onclick="alert('Edit Laptop')">Edit</button> <button onclick="alert('Delete Laptop')">Delete</button></td>
+                </tr>
+                <tr>
+                    <td>Mouse</td>
+                    <td>29.99</td>
+                    <td><button onclick="alert('Edit Mouse')">Edit</button> <button onclick="alert('Delete Mouse')">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <button onclick="showTableObject('mixedTable')">Show Table Object</button>
+        <div id="output3" class="output"></div>
+    </div>
+
+    <script src="dist/HTMLTableKit.standalone.js"></script>
+    <script>
+        // Initialize table instances
+        let employeeTableKit, dataTableKit, mixedTableKit;
+        
+        // Initialize tables immediately since module scripts are deferred
+        try {
+            employeeTableKit = new HTMLTableKit('employeeTable');
+            dataTableKit = new HTMLTableKit('dataTable');
+            mixedTableKit = new HTMLTableKit('mixedTable');
+            
+            console.log('HTMLTableKit instances created successfully');
+        } catch (error) {
+            console.error('Error initializing HTMLTableKit:', error);
+        }
+        
+        // Make functions available globally
+        window.showTableObject = function(tableId) {
+            let output, tableKit;
+            
+            switch(tableId) {
+                case 'employeeTable':
+                    output = document.getElementById('output1');
+                    tableKit = employeeTableKit;
+                    break;
+                case 'dataTable':
+                    output = document.getElementById('output2');
+                    tableKit = dataTableKit;
+                    break;
+                case 'mixedTable':
+                    output = document.getElementById('output3');
+                    tableKit = mixedTableKit;
+                    break;
+            }
+            
+            if (tableKit) {
+                const tableObject = tableKit.getTable();
+                output.textContent = JSON.stringify(tableObject, null, 2);
+            }
+        }
+        
+        window.addEmployee = function() {
+            const name = document.getElementById('newName').value;
+            const age = document.getElementById('newAge').value;
+            const salary = document.getElementById('newSalary').value;
+            const active = document.getElementById('newActive').value;
+            
+            if (!name || !age || !salary) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            const newRow = employeeTableKit.addRow({
+                name: name,
+                age: parseInt(age),
+                salary: parseFloat(salary),
+                active: active
+            });
+            
+            console.log('Added new row:', newRow);
+            
+            // Clear inputs
+            document.getElementById('newName').value = '';
+            document.getElementById('newAge').value = '';
+            document.getElementById('newSalary').value = '';
+            
+            // Show updated table
+            showTableObject('employeeTable');
+        }
+        
+        window.updateEmployee = function() {
+            const id = document.getElementById('updateId').value;
+            const salary = document.getElementById('updateSalary').value;
+            
+            if (!id || !salary) {
+                alert('Please provide employee ID and new salary');
+                return;
+            }
+            
+            const success = employeeTableKit.updateRow(id, {
+                salary: parseFloat(salary)
+            });
+            
+            if (success) {
+                alert('Employee salary updated successfully');
+                document.getElementById('updateId').value = '';
+                document.getElementById('updateSalary').value = '';
+                showTableObject('employeeTable');
+            } else {
+                alert('Employee not found');
+            }
+        }
+        
+        window.deleteEmployee = function() {
+            const id = document.getElementById('deleteId').value;
+            
+            if (!id) {
+                alert('Please provide employee ID');
+                return;
+            }
+            
+            const success = employeeTableKit.deleteRow(id);
+            
+            if (success) {
+                alert('Employee deleted successfully');
+                document.getElementById('deleteId').value = '';
+                showTableObject('employeeTable');
+            } else {
+                alert('Employee not found');
+            }
+        }
+        
+        window.refreshTable = function(tableId) {
+            if (tableId === 'employeeTable' && employeeTableKit) {
+                employeeTableKit.refresh();
+                alert('Table refreshed from DOM');
+                showTableObject('employeeTable');
+            }
+        }
+    </script>
+</body>
+</html>

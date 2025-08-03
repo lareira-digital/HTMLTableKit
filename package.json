@@ -1,0 +1,35 @@
+{
+  "name": "HTMLTableKit",
+  "version": "1.0.0",
+  "description": "A TypeScript library for managing HTML tables",
+  "main": "dist/HTMLTableKit.js",
+  "types": "dist/HTMLTableKit.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:standalone": "node build-browser.js",
+    "build:minify": "node build-minified.js",
+    "build:all": "npm run build && npm run build:standalone && npm run build:minify",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build:all",
+    "serve": "npx http-server -p 8080",
+    "demo": "npm run build:all && npm run serve"
+  },
+  "keywords": [
+    "html",
+    "table",
+    "typescript",
+    "dom",
+    "manipulation"
+  ],
+  "author": "Lareira Digital Developers <developers@lareira.digital>",
+  "license": "GPLv3",
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "terser": "^5.43.1",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist"
+  ]
+}
